@@ -59,7 +59,7 @@
       <span class="text-xs text-zinc-500">Newest first</span>
     </div>
 
-    <%= turbo_frame_tag "messages", class: "space-y-8" do %>
+    <%= turbo_frame_tag "messages", class: "space-y-8", data: { controller: "auto-scroll" } do %>
       <% if @messages.any? %>
         <%= render @messages %>
       <% else %>
