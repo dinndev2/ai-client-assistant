@@ -1,0 +1,5 @@
+<%= form_with model: message do |f| %>
+  <%= f.label :content, "Ask question" %>
+  <%= f.text_field :content %>
+  <%= f.submit %>
+<% end %>

@@ -1,0 +1,6 @@
+<%= turbo_frame_tag "messages", class: "flex flex-col" do %>
+  <%= render @messages %>
+<% end %> 
+
+
+<%= render partial: "messages/form", locals: {message: @message} %>
