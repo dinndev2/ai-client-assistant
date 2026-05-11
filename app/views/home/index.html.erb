@@ -1,6 +1,72 @@
-<%= turbo_frame_tag "messages", class: "flex flex-col" do %>
-  <%= render @messages %>
-<% end %> 
+<div class="flex min-h-[calc(100vh-2.5rem)] flex-col">
+  <header class="flex items-center justify-between py-2">
+    <div class="flex items-center gap-3">
+      <div class="flex h-9 w-9 items-center justify-center rounded-full bg-white text-sm font-semibold text-slate-950">
+        AI
+      </div>
+      <div>
+        <p class="text-sm font-semibold text-white">Client Enquiry Assistant</p>
+        <p class="text-xs text-zinc-400">Strata Management Consultants</p>
+      </div>
+    </div>
 
+    <div class="hidden items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-zinc-400 sm:flex">
+      <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+      <%= pluralize(@messages.count, "analysis") %>
+    </div>
+  </header>
 
-<%= render partial: "messages/form", locals: {message: @message} %>
+  <section class="flex flex-1 flex-col justify-center py-10">
+    <div class="mx-auto w-full max-w-3xl text-center">
+      <p class="text-sm font-medium text-zinc-400">AI triage for incoming client enquiries</p>
+      <h1 class="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-5xl">
+        How can I help with this enquiry?
+      </h1>
+      <p class="mx-auto mt-4 max-w-2xl text-sm leading-6 text-zinc-400 sm:text-base">
+        Paste a client message below. I will classify it, score confidence, recommend the next staff action, and draft a response.
+      </p>
+    </div>
+
+    <div class="mx-auto mt-8 w-full max-w-3xl" data-controller="prompt-suggestions">
+      <%= render partial: "messages/form", locals: { message: @message } %>
+
+      <div class="mt-5">
+        <p class="mb-3 text-center text-xs font-medium uppercase tracking-wide text-zinc-500">Try a recommended enquiry</p>
+
+        <div class="grid gap-3 sm:grid-cols-3">
+          <button type="button" class="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-left transition hover:border-white/20 hover:bg-white/[0.07] disabled:cursor-not-allowed" data-prompt-suggestions-target="suggestion" data-action="prompt-suggestions#submit" data-prompt="I was charged twice for my quarterly levy payment. Can someone please check my account and arrange a refund if this is an error?">
+            <span class="block text-sm font-medium text-white">Billing issue</span>
+            <span class="mt-2 block text-xs leading-5 text-zinc-400">Duplicate levy payment and refund check.</span>
+          </button>
+
+          <button type="button" class="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-left transition hover:border-white/20 hover:bg-white/[0.07] disabled:cursor-not-allowed" data-prompt-suggestions-target="suggestion" data-action="prompt-suggestions#submit" data-prompt="I have reported the leaking roof three times and no one has followed up. This is causing damage inside my unit and I need this escalated urgently.">
+            <span class="block text-sm font-medium text-white">Complaint</span>
+            <span class="mt-2 block text-xs leading-5 text-zinc-400">Unresolved maintenance escalation.</span>
+          </button>
+
+          <button type="button" class="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-left transition hover:border-white/20 hover:bg-white/[0.07] disabled:cursor-not-allowed" data-prompt-suggestions-target="suggestion" data-action="prompt-suggestions#submit" data-prompt="Can you please send me the latest AGM minutes and confirm when the next committee meeting is scheduled?">
+            <span class="block text-sm font-medium text-white">Support request</span>
+            <span class="mt-2 block text-xs leading-5 text-zinc-400">Documents and meeting schedule.</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="mx-auto w-full max-w-3xl pb-10">
+    <div class="mb-4 flex items-center justify-between">
+      <h2 class="text-sm font-semibold text-zinc-300">Recent conversations</h2>
+      <span class="text-xs text-zinc-500">Newest first</span>
+    </div>
+
+    <%= turbo_frame_tag "messages", class: "space-y-8" do %>
+      <% if @messages.any? %>
+        <%= render @messages %>
+      <% else %>
+        <div class="rounded-3xl border border-dashed border-white/10 bg-white/[0.03] p-8 text-center text-sm leading-6 text-zinc-400">
+          Your first analysis will appear here after you submit an enquiry.
+        </div>
+      <% end %>
+    <% end %>
+  </section>
+</div>

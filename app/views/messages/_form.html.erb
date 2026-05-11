@@ -1,5 +1,30 @@
-<%= form_with model: message do |f| %>
-  <%= f.label :content, "Ask question" %>
-  <%= f.text_field :content %>
-  <%= f.submit %>
+<%= form_with model: message, class: "relative rounded-[28px] border border-white/10 bg-[#303030] p-3 shadow-2xl shadow-black/30", data: { action: "submit->prompt-suggestions#lockSubmit turbo:submit-end->prompt-suggestions#hideThinking" } do |f| %>
+  <%= f.label :content, "Client enquiry", class: "sr-only" %>
+
+  <%= f.text_area :content,
+    rows: 4,
+    required: true,
+    autofocus: true,
+    placeholder: "Paste the client enquiry here...",
+    data: { prompt_suggestions_target: "input" },
+    class: "block max-h-64 min-h-28 w-full resize-none rounded-2xl bg-transparent px-3 py-3 pr-14 text-base leading-7 text-white outline-none placeholder:text-zinc-500" %>
+
+  <div class="mt-2 flex items-center justify-between gap-3 px-1">
+    <div class="flex flex-wrap items-center gap-2 text-xs text-zinc-400">
+      <span class="rounded-full border border-white/10 px-3 py-1">Classify</span>
+      <span class="rounded-full border border-white/10 px-3 py-1">Recommend action</span>
+      <span class="rounded-full border border-white/10 px-3 py-1">Draft reply</span>
+    </div>
+
+    <%= f.submit "↑",
+      aria: { label: "Analyse enquiry" },
+      title: "Analyse enquiry",
+      data: { prompt_suggestions_target: "submit" },
+      class: "flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full bg-white text-lg font-semibold leading-none text-slate-950 transition hover:bg-zinc-200 focus:outline-none focus:ring-4 focus:ring-white/20" %>
+  </div>
+
+  <div class="hidden items-center gap-3 border-t border-white/10 px-1 pt-3 text-sm text-zinc-300" data-prompt-suggestions-target="thinking">
+    <span class="h-4 w-4 animate-spin rounded-full border-2 border-zinc-500 border-t-white"></span>
+    <span>Thinking through the enquiry...</span>
+  </div>
 <% end %>

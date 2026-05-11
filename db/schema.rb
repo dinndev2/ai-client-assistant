@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_05_11_032256) do
+ActiveRecord::Schema[8.0].define(version: 2026_05_11_050000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -20,4 +20,19 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_11_032256) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
+
+  create_table "responses", force: :cascade do |t|
+    t.string "category"
+    t.integer "confidence"
+    t.text "summary"
+    t.text "recommended_action"
+    t.text "suggested_response"
+    t.string "sentiment"
+    t.bigint "message_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["message_id"], name: "index_responses_on_message_id"
+  end
+
+  add_foreign_key "responses", "messages"
 end
