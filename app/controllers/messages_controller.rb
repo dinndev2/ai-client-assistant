@@ -1,10 +1,26 @@
 class MessagesController < ApplicationController
   def index
-    @messages = Message.includes(:response).order(created_at: :desc)
+    @messages = messages_scope
 
     respond_to do |f|
       f.html
       f.json { render json: @messages.map { |message| enquiry_payload(message) } }
+    end
+  end
+
+  def destroy_all
+    Message.destroy_all
+
+    respond_to do |f|
+      f.turbo_stream do
+        render turbo_stream: turbo_stream.replace(
+          "conversation_history",
+          partial: "messages/history",
+          locals: { messages: messages_scope }
+        )
+      end
+      f.html { redirect_to root_path, status: :see_other }
+      f.json { head :no_content }
     end
   end
 
@@ -16,7 +32,11 @@ class MessagesController < ApplicationController
 
       respond_to do |f|
         f.turbo_stream do
-          render turbo_stream: turbo_stream.append("messages", partial: "messages/message", locals: { message: @message })
+          render turbo_stream: turbo_stream.replace(
+            "conversation_history",
+            partial: "messages/history",
+            locals: { messages: messages_scope }
+          )
         end
         f.html do
           redirect_to root_path, status: :created
@@ -37,6 +57,10 @@ class MessagesController < ApplicationController
 
   def message_params
     params.require(:message).permit(:content)
+  end
+
+  def messages_scope
+    Message.includes(:response).order(:created_at)
   end
 
   def enquiry_payload(message)

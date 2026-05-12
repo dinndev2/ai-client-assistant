@@ -2,39 +2,134 @@
 
 Small Rails prototype for processing incoming client enquiries for Strata Management Consultants.
 
-The app accepts enquiry text, sends it to an AI model, classifies the enquiry, stores the analysis, and shows staff a recommended action plus a suggested client response.
+The application accepts an enquiry, sends it to an AI model for structured analysis, classifies the enquiry type, stores the result, and presents staff with a recommended action and suggested response.
 
-## Backend Architecture
+---
 
-- `Message`: stores the raw client enquiry.
-- `Response`: stores the AI analysis linked one-to-one with a message.
-- `AskAi`: service object that owns prompt construction, OpenAI API calls, JSON validation, confidence scoring, and fallback handling.
-- `MessagesController`: accepts new enquiries and returns either HTML/Turbo output or JSON API output.
+## Features
 
-Flow:
+- AI-powered enquiry classification
+- Structured JSON AI responses
+- Confidence scoring
+- Sentiment analysis
+- Suggested internal actions
+- Suggested client responses
+- Fallback handling for invalid AI output
+- JSON API support
+- Simple operational dashboard UI
 
-1. Staff submits enquiry text to `POST /messages`.
-2. Rails creates a `Message`.
-3. `AskAi` sends the enquiry to OpenAI and requests strict JSON.
-4. The parsed result is validated and saved as a `Response`.
-5. The controller presents the classification, confidence, summary, recommended action, suggested response, and sentiment.
+---
+
+## Application Flow
+
+```text
+Client enquiry submitted
+        ↓
+Message record created
+        ↓
+AskAi service sends enquiry to OpenAI
+        ↓
+AI returns structured JSON analysis
+        ↓
+Response is validated and saved
+        ↓
+Results displayed to staff
+```
+
+---
+
+## Important Files / Code Walkthrough
+
+### AI Processing Service
+
+Main business logic:
+
+```text
+app/services/ask_ai.rb
+```
+
+Responsibilities:
+- prompt engineering
+- OpenAI API integration
+- JSON parsing
+- schema validation
+- confidence scoring
+- fallback handling
+- response persistence
+
+This service acts as the AI orchestration layer for the application.
+
+---
+
+### Controller
+
+```text
+app/controllers/messages_controller.rb
+```
+
+Responsibilities:
+- accepting incoming enquiries
+- creating `Message` records
+- triggering AI processing
+- rendering HTML/Turbo or JSON responses
+
+---
+
+### Models
+
+#### Message
+
+```text
+app/models/message.rb
+```
+
+Stores the original client enquiry.
+
+#### Response
+
+```text
+app/models/response.rb
+```
+
+Stores the AI-generated analysis linked to a single message.
+
+---
+
+## Database Schema
+
+Relationship:
+
+```text
+Message
+  has_one :response
+```
+
+The `responses` table stores:
+- category
+- confidence score
+- summary
+- recommended action
+- suggested response
+- sentiment
+
+---
 
 ## AI Prompt Design
 
-The prompt asks the model to return only JSON with this shape:
+The AI is instructed to return only structured JSON in this format:
 
 ```json
 {
   "category": "Complaint",
   "confidence": 92,
-  "summary": "One sentence summary of the enquiry.",
-  "recommended_action": "Specific next staff action.",
-  "suggested_response": "Professional response staff can send to the client.",
+  "summary": "Client reports duplicate billing issue.",
+  "recommended_action": "Escalate to billing support.",
+  "suggested_response": "We’re sorry for the inconvenience and are investigating the issue.",
   "sentiment": "Negative"
 }
 ```
 
-Categories are constrained to:
+Supported categories:
 
 - `New Client`
 - `Support Request`
@@ -43,23 +138,76 @@ Categories are constrained to:
 - `General Question`
 - `Out of Scope`
 
-The prompt includes definitions for each category so classifications are consistent. Vague enquiries are routed to `General Question` with lower confidence. Unrelated or nonsensical enquiries are routed to `Out of Scope`.
+The prompt intentionally constrains:
+- output structure
+- category options
+- tone
+- operational behavior
 
-## Error Handling
+This improves consistency and makes the output safer for automation workflows.
 
-If the AI call fails, the response is invalid JSON, required keys are missing, or the enquiry is blank, the app stores a fallback response with `confidence: 0` and recommends manual review. This keeps the staff workflow usable even when automation fails.
+---
+
+## Validation & Error Handling
+
+AI responses are never trusted directly.
+
+The application:
+- parses AI output using `JSON.parse`
+- validates required keys
+- falls back safely if parsing fails
+- handles API/network failures gracefully
+
+Fallback responses are stored with:
+- `confidence: 0`
+- manual review recommendation
+
+This ensures the workflow remains operational even if the AI output is invalid.
+
+---
 
 ## Automation Potential
 
-This backend can plug into a larger workflow by replacing manual text input with:
+This prototype is intentionally designed to support future operational integrations such as:
 
-- inbound email parsing
-- a CRM webhook
-- a background job queue using Solid Queue
-- staff notifications for low-confidence or complaint classifications
-- automatic CRM task creation based on `recommended_action`
+- inbound email ingestion
+- CRM integration
+- automated ticket creation
+- complaint escalation workflows
+- Slack/MS Teams notifications
+- background processing queues
+- analytics dashboards
+
+---
+
+## Technical Decisions
+
+### Why Rails?
+
+Rails was chosen for:
+- rapid prototyping
+- clean service object architecture
+- fast database-backed workflows
+- simple deployment
+- built-in JSON/API support
+
+### Why Structured JSON Output?
+
+Structured outputs allow the AI response to behave more like an operational system component rather than a conversational chatbot.
+
+This makes downstream automation and validation significantly easier.
+
+### Why No Background Jobs?
+
+The application intentionally processes requests synchronously to keep deployment simple for the prototype scope.
+
+In production, AI processing could be moved to background jobs for retry handling and scalability.
+
+---
 
 ## Setup
+
+Install dependencies:
 
 ```bash
 bundle install
@@ -78,7 +226,7 @@ Optional model override:
 export OPENAI_MODEL=gpt-4o-mini
 ```
 
-Run the app:
+Run the application:
 
 ```bash
 bin/rails server
@@ -90,7 +238,9 @@ Open:
 http://localhost:3000
 ```
 
-## JSON Usage
+---
+
+## Example JSON API Request
 
 ```bash
 curl -X POST http://localhost:3000/messages \
@@ -99,8 +249,26 @@ curl -X POST http://localhost:3000/messages \
   -d '{"message":{"content":"I was charged twice for my levy payment. Can someone check this?"}}'
 ```
 
+---
+
 ## Tests
 
 ```bash
 bin/rails test
 ```
+
+---
+
+## Future Improvements
+
+Potential future enhancements include:
+
+- multi-tenant support
+- AI prompt versioning
+- retry mechanisms
+- vector search / RAG workflows
+- audit logging
+- admin analytics dashboard
+- role-based staff workflows
+
+This version focuses on demonstrating practical AI workflow integration within a lightweight operational tool.

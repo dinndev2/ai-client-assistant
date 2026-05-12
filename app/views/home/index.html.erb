@@ -53,20 +53,5 @@
     </div>
   </section>
 
-  <section class="mx-auto w-full max-w-3xl pb-10">
-    <div class="mb-4 flex items-center justify-between">
-      <h2 class="text-sm font-semibold text-zinc-300">Recent conversations</h2>
-      <span class="text-xs text-zinc-500">Newest first</span>
-    </div>
-
-    <%= turbo_frame_tag "messages", class: "space-y-8", data: { controller: "auto-scroll" } do %>
-      <% if @messages.any? %>
-        <%= render @messages %>
-      <% else %>
-        <div class="rounded-3xl border border-dashed border-white/10 bg-white/[0.03] p-8 text-center text-sm leading-6 text-zinc-400">
-          Your first analysis will appear here after you submit an enquiry.
-        </div>
-      <% end %>
-    <% end %>
-  </section>
+  <%= render partial: "messages/history", locals: { messages: @messages } %>
 </div>

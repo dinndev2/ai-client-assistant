@@ -1,0 +1,24 @@
+<%= turbo_frame_tag "conversation_history" do %>
+  <section class="mx-auto w-full max-w-3xl pb-10">
+    <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <h2 class="text-sm font-semibold text-zinc-300">Recent conversations</h2>
+        <p class="mt-1 text-xs text-zinc-500">Latest replies appear at the bottom</p>
+      </div>
+
+      <% if messages.any? %>
+        <%= button_to destroy_all_messages_path,
+          method: :delete,
+          form: { data: { turbo_confirm: "Clear all saved enquiries and AI responses?" } },
+          class: "inline-flex items-center justify-center gap-2 rounded-full border border-rose-300/20 bg-rose-400/10 px-4 py-2 text-sm font-medium text-rose-100 transition hover:border-rose-300/30 hover:bg-rose-400/20 focus:outline-none focus:ring-4 focus:ring-rose-300/10" do %>
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M10 11v6M14 11v6M5 7h14M9 7V5.5C9 4.7 9.7 4 10.5 4h3c.8 0 1.5.7 1.5 1.5V7M18 7l-.7 12.1c-.1 1.1-1 1.9-2.1 1.9H8.8c-1.1 0-2-.8-2.1-1.9L6 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>Clear conversations</span>
+        <% end %>
+      <% end %>
+    </div>
+
+    <%= render partial: "messages/messages", locals: { messages: messages } %>
+  </section>
+<% end %>

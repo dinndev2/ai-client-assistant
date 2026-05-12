@@ -12,6 +12,8 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   # root "posts#index"
   get "home", to: "home#index"
-  resources :messages
+  resources :messages do
+    delete :destroy_all, on: :collection
+  end
   root "home#index"
 end
